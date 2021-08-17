@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# JetBrains
+.idea/
+
+# Node.js
+dist/
+node_modules/
+
+# Terraform
+.terraform
+
+# Secrets
+terraform.tfstate
+terraform.tfstate.backup
+secrets.tfvars

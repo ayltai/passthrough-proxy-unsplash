@@ -1,0 +1,66 @@
+name: CI
+on:
+  - push
+jobs:
+  test-javascript:
+    name: Test JavaScript
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+      - name: Install dependencies
+        run: npm i
+      - name: Run tests
+        run: npm test
+      - name: Save coverage report
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage
+          path: coverage/
+  test-terraform:
+    name: Test Terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ~1.0
+      - name: Initialize
+        run: terraform init
+        working-directory: terraform/local
+        env:
+          TF_IN_AUTOMATION: true
+      - name: Format
+        run: terraform fmt -check
+        working-directory: terraform/local
+        env:
+          TF_IN_AUTOMATION: true
+      - name: Validate
+        run: terraform validate -no-color
+        working-directory: terraform/local
+        env:
+          TF_IN_AUTOMATION: true
+      - name: Start infrastructure
+        run: docker run --rm -it -p 4566:4566 -p 4571:4571 -e "SERVICES=iam,lambda,apigateway,cloudwatch,logs,sts" -d localstack/localstack
+      - name: Plan
+        run: terraform plan -lock-timeout=300s -out=main -no-color
+        working-directory: terraform/local
+        env:
+          TF_IN_AUTOMATION: true
+      - name: Apply
+        run: terraform apply -lock-timeout=300s -auto-approve main
+        working-directory: terraform/local
+        env:
+          TF_IN_AUTOMATION: true
+      - name: Export REST API URL
+        run: echo REST_API_URL="$(cat rest_api_url.txt)/photos/random?client_id=${{ secrets.API_KEY_UNSPLASH }}" >> $GITHUB_ENV
+        working-directory: terraform/local
+      - name: Test the API endpoint
+        run: curl ${{ env.REST_API_URL }}
+        working-directory: terraform/local
