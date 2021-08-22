@@ -18,7 +18,8 @@ class Response {
         return {
             statusCode : this.statusCode || 200,
             headers    : {
-                'Content-Type' : typeof body === 'object' ? 'application/json' : 'html/text',
+                'Content-Type'               : typeof body === 'object' ? 'application/json' : 'html/text',
+                'Access-Control-Allow-Origin': '*',
             },
             body       : typeof body === 'object' ? JSON.stringify(body) : String(body),
         };
@@ -28,7 +29,8 @@ class Response {
         return {
             statusCode,
             headers : {
-                'Content-Type' : 'application/json',
+                'Content-Type'               : 'application/json',
+                'Access-Control-Allow-Origin': '*',
             },
             body    : message ? JSON.stringify({
                 error : message,

@@ -12,7 +12,7 @@ class Router {
         let routes = [];
         if (event.httpMethod === 'GET') routes = this.gets;
 
-        const path = Object.keys(routes).find(route => route === event.path);
+        const path = Object.keys(routes).find(route => event.path.startsWith(route));
         if (path) {
             const handler = routes[path];
             if (handler) return await handler(new Request(event), new Response());
