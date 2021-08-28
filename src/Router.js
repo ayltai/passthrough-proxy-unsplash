@@ -15,7 +15,7 @@ class Router {
         const path = Object.keys(routes).find(route => event.path.startsWith(route));
         if (path) {
             const handler = routes[path];
-            if (handler) return await handler(new Request(event), new Response());
+            if (handler) return handler(new Request(event), new Response());
         }
 
         return defaultHandler(new Request(event), new Response());
